@@ -12,21 +12,21 @@ import lombok.Getter;
 @Getter
 public class CheckCertificationResponseDto extends ResponseDto {
 
-    private CheckCertificationResponseDto() {
-        super();
-    };
+  private CheckCertificationResponseDto() {
+    super();
+  };
 
-    // 인증에 성공했을때 반환할 함수
-    public static ResponseEntity<CheckCertificationResponseDto> success() {
-        CheckCertificationResponseDto responseBody = new CheckCertificationResponseDto();
-        return ResponseEntity.status(HttpStatus.OK).body(responseBody);
-    }
+  // 인증에 성공했을때 반환할 함수
+  public static ResponseEntity<CheckCertificationResponseDto> success() {
+    CheckCertificationResponseDto responseBody = new CheckCertificationResponseDto();
+    return ResponseEntity.status(HttpStatus.OK).body(responseBody);
+  }
 
-    // 인증에 실패했을때 반환할 함수
-    public static ResponseEntity<ResponseDto> certificationFail() {
-        ResponseDto responseBody = new ResponseDto(ResponseCode.CERTIFICATION_FAIL, ResponseMessage.CERTIFICATION_FAIL);
+  // 인증에 실패했을때 반환할 함수
+  public static ResponseEntity<ResponseDto> certificationFail() {
+    ResponseDto responseBody = new ResponseDto(ResponseCode.CERTIFICATION_FAIL, ResponseMessage.CERTIFICATION_FAIL);
 
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(responseBody);
-    }
+    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(responseBody);
+  }
 
 }

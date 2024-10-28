@@ -11,14 +11,14 @@ import lombok.Setter;
 @NoArgsConstructor
 public class CheckCertificationRequestDto {
 
-    @NotBlank
-    private String id;
+  @NotBlank
+  private String id;
 
-    @Email
-    @NotBlank
-    private String email;
+  @Email
+  @NotBlank
+  private String email;
 
-    @NotBlank
-    private String certificationNumber;
-    
+  @NotBlank
+  private String certificationNumber;
+
 }

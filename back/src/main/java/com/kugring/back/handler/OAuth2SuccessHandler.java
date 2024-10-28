@@ -18,21 +18,20 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
-    private final JwtProvider jwtProvider;
-    
-	@Override
-	public void onAuthenticationSuccess(
-        HttpServletRequest request, 
-        HttpServletResponse response,
-        Authentication authentication // 이건 오버라이드하고 이후에 따로 spring security 따로 임포트 해줬다! 
-    ) throws IOException, ServletException { // 이것도 그냥 임포트해줌 import java.io.IOException;
+  private final JwtProvider jwtProvider;
 
-        CustomOAuth2User oAuth2User = (CustomOAuth2User)authentication.getPrincipal();
+  @Override
+  public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication // 이건 오버라이드하고 이후에 따로
+                                                                                                                              // spring security 따로
+                                                                                                                              // 임포트 해줬다!
+  ) throws IOException, ServletException { // 이것도 그냥 임포트해줌 import java.io.IOException;
 
-        String userId = oAuth2User.getName(); // 이것으로 userId를 꺼내온다.
-        String token = jwtProvider.create(userId);
+    CustomOAuth2User oAuth2User = (CustomOAuth2User) authentication.getPrincipal();
 
-        response.sendRedirect("http://localhost:3000/auth/oauth-response/" + token + "/3600");
+    String userId = oAuth2User.getName(); // 이것으로 userId를 꺼내온다.
+    String token = jwtProvider.create(userId);
 
-	}
+    response.sendRedirect("http://localhost:3000/auth/oauth-response/" + token + "/3600");
+
+  }
 }

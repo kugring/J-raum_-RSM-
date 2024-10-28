@@ -12,7 +12,7 @@ import lombok.Setter;
 @NoArgsConstructor
 public class IdCheckRequestDto extends ResponseDto {
 
-    @NotBlank
-    private String id;
+  @NotBlank
+  private String id;
 
 }

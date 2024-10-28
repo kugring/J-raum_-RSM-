@@ -10,12 +10,12 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity(name="certification")
-@Table(name="certification")
+@Entity(name = "certification")
+@Table(name = "certification")
 public class CertificationEntity {
-    
-    @Id
-    private String userId;
-    private String email;
-    private String certificationNumber;
+
+  @Id
+  private String userId;
+  private String email;
+  private String certificationNumber;
 }

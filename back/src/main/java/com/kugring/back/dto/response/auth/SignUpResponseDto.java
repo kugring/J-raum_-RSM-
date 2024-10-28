@@ -10,24 +10,24 @@ import com.kugring.back.dto.response.ResponseDto;
 import lombok.Getter;
 
 @Getter
-public class SignUpResponseDto extends ResponseDto{
-    
-    private SignUpResponseDto(){
-        super();
-    }
+public class SignUpResponseDto extends ResponseDto {
 
-    public static ResponseEntity<SignUpResponseDto> success(){
-        SignUpResponseDto responseBody = new SignUpResponseDto();
-        return ResponseEntity.status(HttpStatus.OK).body(responseBody);
-    }
+  private SignUpResponseDto() {
+    super();
+  }
 
-    public static ResponseEntity<ResponseDto> duplicateId(){
-        ResponseDto responseBody = new ResponseDto(ResponseCode.DUPLICATE_ID, ResponseMessage.DUPLICATE_ID);
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseBody);
-    }
+  public static ResponseEntity<SignUpResponseDto> success() {
+    SignUpResponseDto responseBody = new SignUpResponseDto();
+    return ResponseEntity.status(HttpStatus.OK).body(responseBody);
+  }
 
-    public static ResponseEntity<ResponseDto> certificationFail(){
-        ResponseDto responseBody = new ResponseDto(ResponseCode.CERTIFICATION_FAIL, ResponseMessage.CERTIFICATION_FAIL);
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(responseBody);
-    }
+  public static ResponseEntity<ResponseDto> duplicateId() {
+    ResponseDto responseBody = new ResponseDto(ResponseCode.DUPLICATE_ID, ResponseMessage.DUPLICATE_ID);
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseBody);
+  }
+
+  public static ResponseEntity<ResponseDto> certificationFail() {
+    ResponseDto responseBody = new ResponseDto(ResponseCode.CERTIFICATION_FAIL, ResponseMessage.CERTIFICATION_FAIL);
+    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(responseBody);
+  }
 }

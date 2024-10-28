@@ -8,10 +8,10 @@ import com.kugring.back.entity.UserEntity;
 @Repository
 public interface UserRepository extends JpaRepository<UserEntity, String> {
 
-    boolean existsByUserId(String userId);
+  boolean existsByUserId(String userId);
 
-    UserEntity findByUserId(String userId);
+  UserEntity findByUserId(String userId);
 
+  UserEntity findByPin(String pin);
 
-    
 }
