@@ -124,7 +124,7 @@ public class PointServiceImplement implements PointService {
 
       // 포인트충전의 userId와 충전금액을 찾는다.
       // String userId = pointChargeEntity.getUserId();
-      int chargePoint = pointChargeEntity.getChargePoint();
+      // int chargePoint = pointChargeEntity.getChargePoint();
 
       // 찾은 userID로 유저데이터 조회
       // UserEntity userEntity = userRepository.findByUserId(userId);
