@@ -30,11 +30,11 @@ public class OrderController {
   private final OrderService orderService;
 
 
-  // @PostMapping("/filter")
-  // public ResponseEntity<? super FilterOrderListResponseDto> getOrderList(@RequestBody @Valid FilterOrderListRequestDto reqeustBody) {
-  //   ResponseEntity<? super FilterOrderListResponseDto> resposne = orderService.filterOrderList(reqeustBody);
-  //   return resposne;
-  // }
+  @PostMapping("/filter")
+  public ResponseEntity<? super FilterOrderListResponseDto> getOrderList(@RequestBody @Valid FilterOrderListRequestDto reqeustBody) {
+    ResponseEntity<? super FilterOrderListResponseDto> resposne = orderService.filterOrderList(reqeustBody);
+    return resposne;
+  }
 
 
   @PostMapping("")

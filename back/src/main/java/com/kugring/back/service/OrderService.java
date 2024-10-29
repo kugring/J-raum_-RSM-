@@ -13,7 +13,7 @@ import com.kugring.back.dto.response.order.PutOrderListResponseDto;
 
 public interface OrderService {
 
-  // ResponseEntity<? super FilterOrderListResponseDto> filterOrderList(FilterOrderListRequestDto dto);
+  ResponseEntity<? super FilterOrderListResponseDto> filterOrderList(FilterOrderListRequestDto dto);
 
   ResponseEntity<? super PostOrderListResponseDto> postOrderList(PostOrderListRequestDto dto);
 

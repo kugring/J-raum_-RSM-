@@ -5,7 +5,6 @@ import java.util.List;
 
 import com.kugring.back.entity.OrderItemEntity;
 
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,30 +14,38 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class OrderItemObject {
 
-  private int orderItemId;
-
   private int menuId;
-
-  @NotNull
+  private int menuPrice;
+  private int orderItemId;
+  private int espressoShot;
   private int orderItemQuantity;
 
-
+  private String image;
+  private String menuName;
+  private String category;
+  private String temperature;
   private List<OrderItemOptionObject> orderItemOptions;
 
 
-  // public OrderItem(OrderItemEntity orderItemEntity) {
-  //   this.menuId = orderItemEntity.getMenu().getMenuId();
-  //   this.orderItemQuantity = orderItemEntity.getOrderItemQuantity();
-  //   this.orderItemOptions = OrderItemOption.getList(orderItemEntity.getOrderItemOptions());
-  // }
+  public OrderItemObject(OrderItemEntity orderItemEntity) {
+    this.image = orderItemEntity.getMenu().getImage();
+    this.menuId = orderItemEntity.getMenu().getMenuId();
+    this.menuName = orderItemEntity.getMenu().getMenuName();
+    this.category = orderItemEntity.getMenu().getCategory();
+    this.menuPrice = orderItemEntity.getMenu().getMenuPrice();
+    this.temperature = orderItemEntity.getMenu().getTemperature();
+    this.espressoShot = orderItemEntity.getMenu().getEspressoShot();
+    this.orderItemQuantity = orderItemEntity.getOrderItemQuantity();
+    this.orderItemOptions = OrderItemOptionObject.getList(orderItemEntity.getOrderItemOptions());
+  }
 
-  // public static List<OrderItem> getList(List<OrderItemEntity> orderItemEntities) {
+  public static List<OrderItemObject> getList(List<OrderItemEntity> orderItemEntities) {
 
-  //   List<OrderItem> list = new ArrayList<>();
-  //   for (OrderItemEntity orderItemEntity : orderItemEntities) {
-  //     OrderItem item = new OrderItem(orderItemEntity);
-  //     list.add(item);
-  //   }
-  //   return list;
-  // }
+    List<OrderItemObject> list = new ArrayList<>();
+    for (OrderItemEntity orderItemEntity : orderItemEntities) {
+      OrderItemObject item = new OrderItemObject(orderItemEntity);
+      list.add(item);
+    }
+    return list;
+  }
 }

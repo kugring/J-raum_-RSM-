@@ -146,36 +146,42 @@ public class OrderServiceImplement implements OrderService {
 
     }
 
-    // @Override
-    // public ResponseEntity<? super FilterOrderListResponseDto> filterOrderList(FilterOrderListRequestDto dto) {
+    @Override
+    public ResponseEntity<? super FilterOrderListResponseDto> filterOrderList(FilterOrderListRequestDto dto) {
 
-    //     List<OrderListEntity> orderListEntities = new ArrayList<>();
+        List<OrderListEntity> orderListEntities = new ArrayList<>();
 
-    //     try {
+        try {
 
-    //         String userId = dto.getUserId();
-    //         String orderStatus = dto.getOrderStatus();
-    //         LocalDateTime startCreateDate = dto.getStartCreateDate();
-    //         LocalDateTime endCreateDate = dto.getEndCreateDate();
-    //         LocalDateTime startCompleteDate = dto.getStartCompleteDate();
-    //         LocalDateTime endCompleteDate = dto.getEndCompleteDate();
+            String userId = dto.getUserId();
+            String orderStatus = dto.getOrderStatus();
+            LocalDateTime startCreateDate = dto.getStartCreateDate();
+            LocalDateTime endCreateDate = dto.getEndCreateDate();
+            LocalDateTime startCompleteDate = dto.getStartCompleteDate();
+            LocalDateTime endCompleteDate = dto.getEndCompleteDate();
 
-    //         // 회원정보가 없는 겨우
-    //         if (userId != null && !userRepository.existsByUserId(userId))
-    //             return FilterOrderListResponseDto.noExistUser();
-    //         // 주문상태가 다른 경우
-    //         if (orderStatus != null && !("대기".equals(orderStatus) || "완성".equals(orderStatus)))
-    //             return FilterOrderListResponseDto.vaildationFail();
-    //         orderListEntities =
-    //                 orderListRepository.findOrders(userId, orderStatus, startCreateDate, endCreateDate, startCompleteDate, endCompleteDate);
+            System.out.println("이것은 회원Id : " + userId);
+            System.out.println("이것은 상태 : " + orderStatus);
+            System.out.println("이것은 생성시작 : " + startCreateDate);
+            System.out.println("이것은 생성종료 : " + endCreateDate);
+            System.out.println("이것은 완료시작 : " + startCompleteDate);
+            System.out.println("이것은 완료종료 : " + endCompleteDate);
 
-    //     } catch (Exception exception) {
-    //         exception.printStackTrace();
-    //         ResponseDto.databaseError();
-    //     }
+            boolean weasdf = startCreateDate == null ? true : false;
+            boolean asdfwef = endCompleteDate == null ? true : false;
 
-    //     return FilterOrderListResponseDto.success(orderListEntities);
-    // }
+            System.out.println("생성시작값:" + weasdf);
+            System.out.println("완료종료값:" + asdfwef);
+
+            orderListEntities = orderListRepository.findOrders(userId, orderStatus, startCreateDate, endCreateDate, startCompleteDate, endCompleteDate);
+
+        } catch (Exception exception) {
+            exception.printStackTrace();
+            ResponseDto.databaseError();
+        }
+
+        return FilterOrderListResponseDto.success(orderListEntities);
+    }
 
     // @Override
     // @Transactional

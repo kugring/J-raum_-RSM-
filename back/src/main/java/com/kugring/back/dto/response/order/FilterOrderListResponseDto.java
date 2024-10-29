@@ -20,7 +20,7 @@ public class FilterOrderListResponseDto extends ResponseDto {
 
   private FilterOrderListResponseDto(List<OrderListEntity> orderListEntities) {
     super();
-    // this.orderItems = OrderListItem.getList(orderListEntities);
+    this.orderItems = OrderListItemObject.getList(orderListEntities);
   }
 
   // 성공 응답
