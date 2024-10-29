@@ -8,8 +8,8 @@ import java.util.stream.Collectors;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import com.kugring.back.dto.object.OrderItem;
-import com.kugring.back.dto.object.OrderItemOption;
+import com.kugring.back.dto.object.OrderItemObject;
+import com.kugring.back.dto.object.OrderItemOptionObject;
 import com.kugring.back.dto.request.order.FilterOrderListRequestDto;
 import com.kugring.back.dto.request.order.PatchOrderListRequestDto;
 import com.kugring.back.dto.request.order.PostOrderListRequestDto;
@@ -54,19 +54,17 @@ public class OrderServiceImplement implements OrderService {
 
         try {
             // 주문요청자의 회원존재 유무 확인
-            if (!userRepository.existsByUserId(dto.getUserId())) return PostOrderListResponseDto.noExistUser();
+            UserEntity userEntity = userRepository.findByUserId(dto.getUserId());
+            if(userEntity == null) return PostOrderListResponseDto.noExistUser();
             // 메뉴 ID들 추출
-            List<Integer> menuIds = dto.getOrderItems().stream().map(OrderItem::getMenuId).collect(Collectors.toList());
+            List<Integer> menuIds = dto.getOrderItems().stream().map(OrderItemObject::getMenuId).collect(Collectors.toList());
             // 해당 메뉴 ID들이 모두 존재하는지 확인
             if (menuRepository.countByMenuIdIn(menuIds) != menuIds.size()) return PostOrderListResponseDto.noExistMenu();
             // 옵션 코드들 추출
-            List<String> optionCodes = dto.getOrderItems().stream().flatMap(orderItem -> orderItem.getOrderItemOptions().stream()).map(OrderItemOption::getOptionCode).collect(Collectors.toList());
+            List<String> optionCodes = dto.getOrderItems().stream().flatMap(orderItem -> orderItem.getOrderItemOptions().stream()).map(OrderItemOptionObject::getOptionCode).collect(Collectors.toList());
             // 해당 옵션 코드들이 모두 존재하는지 확인
             if (optionRepository.countByOptionCodeIn(optionCodes) != optionCodes.size()) return PostOrderListResponseDto.noExistOption();
             
-
-            UserEntity userEntity = userRepository.findByUserId(dto.getUserId());
-
             // OrderListEntity 생성
             OrderListEntity orderList = new OrderListEntity();
 
@@ -102,9 +100,8 @@ public class OrderServiceImplement implements OrderService {
                 return orderItem;
             }).collect(Collectors.toList());
 
-            orderList.setOrderItems(orderItems);
 
-            int totalPrice = orderList.getOrderItems().stream()
+            int totalPrice = orderItems.stream()
                 .mapToInt(orderItem -> {
                     int menuPrice = orderItem.getMenu().getMenuPrice();
                     int itemQuantity = orderItem.getOrderItemQuantity();
@@ -121,12 +118,20 @@ public class OrderServiceImplement implements OrderService {
             int updatedPoint = userEntity.getPoint() - totalPrice;
 
             // 포인트가 음수가 되지 않도록 설정
-            if (updatedPoint < 0) {
-                updatedPoint = 0;
-            }
+            if (updatedPoint < 0) return PostOrderListResponseDto.insufficientBlance();
             // 잔여금 저장
             userEntity.setPoint(updatedPoint);
             
+            // 주문_아이템 담기
+            orderList.setOrderItems(orderItems);
+            // 주문자 등록
+            orderList.setUser(userEntity);
+            // 주문 날짜 등록
+            orderList.setCreateOrderDate(LocalDateTime.now());
+            // 주문 상태 등록
+            orderList.setOrderStatus("대기");
+            // 주문 결제 방법 등록
+            orderList.setPayMethod(dto.getPayMethod());
 
             // 저장
             userRepository.save(userEntity);

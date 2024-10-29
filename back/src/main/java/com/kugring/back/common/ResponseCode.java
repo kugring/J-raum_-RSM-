@@ -27,6 +27,7 @@ public interface ResponseCode {
   String PIN_CHECK_FAIL = "PF";
 
   String CANCEL_POINT_CHARGE_FAIL = "CPF";
+  String DELETE_POINT_CHARGE_FAIL = "DPF";
   String POINT_CHARGE_FAIL = "PCF";
   String ALREADY_POINT_CHARGE = "APC";
 

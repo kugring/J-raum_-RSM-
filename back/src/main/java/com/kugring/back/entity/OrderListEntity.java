@@ -1,6 +1,7 @@
 package com.kugring.back.entity;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.kugring.back.dto.request.order.PostOrderListRequestDto;
@@ -38,7 +39,7 @@ public class OrderListEntity {
   private LocalDateTime completeOrderDate;
 
   @OneToMany(mappedBy = "orderList", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-  private List<OrderItemEntity> orderItems;
+  private List<OrderItemEntity> orderItems = new ArrayList<>();
 
   @ManyToOne  @JoinColumn(name = "user_id")
   private UserEntity user;

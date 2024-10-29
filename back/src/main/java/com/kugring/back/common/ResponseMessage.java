@@ -25,6 +25,7 @@ public interface ResponseMessage {
   String PIN_CHECK_FAIL = "Pin check failed.";
 
   String CANCEL_POINT_CHARGE_FAIL = "Cancel point charge failed.";
+  String DELETE_POINT_CHARGE_FAIL = "Delete point charge failed.";
   String POINT_CHARGE_FAIL = "Point charge failed.";
   String ALREADY_POINT_CHARGE = "Already charge point.";
 

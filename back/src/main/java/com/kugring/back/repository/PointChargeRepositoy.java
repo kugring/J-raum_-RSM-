@@ -4,6 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import com.kugring.back.entity.PointChargeEntity;
+import com.kugring.back.entity.UserEntity;
 
 
 @Repository
@@ -17,7 +18,7 @@ public interface PointChargeRepositoy extends JpaRepository<PointChargeEntity, I
 
   PointChargeEntity findByStatus(String stause);
 
-  PointChargeEntity findByUserId(String userId);
+  PointChargeEntity findByUser(UserEntity user);
 
   PointChargeEntity findByManagerId(int managerId);
 

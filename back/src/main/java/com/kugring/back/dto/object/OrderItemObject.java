@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class OrderItem {
+public class OrderItemObject {
 
   private int orderItemId;
 
@@ -23,7 +23,7 @@ public class OrderItem {
   private int orderItemQuantity;
 
 
-  private List<OrderItemOption> orderItemOptions;
+  private List<OrderItemOptionObject> orderItemOptions;
 
 
   // public OrderItem(OrderItemEntity orderItemEntity) {

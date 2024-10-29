@@ -2,7 +2,6 @@ package com.kugring.back.entity;
 
 import java.util.List;
 import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
@@ -22,7 +21,6 @@ import lombok.Setter;
 public class MenuEntity {
 
   @Id
-  @Column(name="menu_id")
   private int menuId;
   private String menuName;
   private String category;

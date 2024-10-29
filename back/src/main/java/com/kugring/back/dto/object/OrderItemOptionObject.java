@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class OrderItemOption {
+public class OrderItemOptionObject {
 
   @NotBlank
   private String optionCode;

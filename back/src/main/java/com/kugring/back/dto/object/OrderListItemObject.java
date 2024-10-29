@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class OrderListItem {
+public class OrderListItemObject {
 
   private int orderListId;
   private String userId;
@@ -21,7 +21,7 @@ public class OrderListItem {
   private String payMethod;
   private LocalDateTime createOrderDate;
   private LocalDateTime completeOrderDate;
-  private List<OrderItem> orderItems;
+  private List<OrderItemObject> orderItems;
 
 
   // public OrderListItem(OrderListEntity orderListEntity) {

@@ -12,22 +12,22 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class OptionListItem {
+public class OptionCodeObject {
 
   private String optionCode;
   private String optionDetail;
   private int optionPrice;
 
-  public OptionListItem(OptionEntity optionEntity) {
+  public OptionCodeObject(OptionEntity optionEntity) {
     this.optionCode = optionEntity.getOptionCode();
     this.optionDetail = optionEntity.getOptionDetail();
     this.optionPrice = optionEntity.getOptionPrice();
   }
 
-  public static List<OptionListItem> getList(List<OptionEntity> optionEntities) {
-    List<OptionListItem> list = new ArrayList<>();
+  public static List<OptionCodeObject> getList(List<OptionEntity> optionEntities) {
+    List<OptionCodeObject> list = new ArrayList<>();
     for (OptionEntity optionEntity : optionEntities) {
-      OptionListItem optionListItem = new OptionListItem(optionEntity);
+      OptionCodeObject optionListItem = new OptionCodeObject(optionEntity);
       list.add(optionListItem);
     }
     return list;

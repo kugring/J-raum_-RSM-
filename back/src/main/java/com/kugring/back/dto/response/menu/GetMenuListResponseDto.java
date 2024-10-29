@@ -3,7 +3,7 @@ package com.kugring.back.dto.response.menu;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import com.kugring.back.dto.object.MenuListItem;
+import com.kugring.back.dto.object.MenuListObject;
 import com.kugring.back.dto.response.ResponseDto;
 import com.kugring.back.entity.MenuEntity;
 
@@ -16,11 +16,11 @@ import lombok.Getter;
 @Getter
 public class GetMenuListResponseDto extends ResponseDto {
 
-  private List<MenuListItem> menuList;
+  private List<MenuListObject> menuList;
 
   private GetMenuListResponseDto(List<MenuEntity> menuEntities) {
     super();
-    this.menuList = MenuListItem.getList(menuEntities);
+    this.menuList = MenuListObject.getList(menuEntities);
   }
 
   public static ResponseEntity<GetMenuListResponseDto> success(List<MenuEntity> menuEntities) {

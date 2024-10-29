@@ -5,9 +5,11 @@ import org.springframework.stereotype.Service;
 
 import com.kugring.back.dto.request.point.ApprovalPointChargeRequestDto;
 import com.kugring.back.dto.request.point.CancelPointChargeRequestDto;
+import com.kugring.back.dto.request.point.DeletePointChargeRequestDto;
 import com.kugring.back.dto.request.point.PointDirectChargeRequestDto;
 import com.kugring.back.dto.response.point.ApprovalPointChargeResponseDto;
-import com.kugring.back.dto.response.point.CancelPointChargeResponse;
+import com.kugring.back.dto.response.point.CancelPointChargeResponseDto;
+import com.kugring.back.dto.response.point.DeletePointChargeResponseDto;
 import com.kugring.back.dto.response.point.PointDirectChargeResponseDto;
 import com.kugring.back.dto.request.point.PostPointChargeRequestDto;
 import com.kugring.back.dto.response.ResponseDto;
@@ -26,26 +28,29 @@ import lombok.RequiredArgsConstructor;
 public class PointServiceImplement implements PointService {
 
   private final UserRepository userRepository;
-  private final PointChargeRepositoy pointChargeRepositoy;
   private final ManagerRepository managerRepository;
+  private final PointChargeRepositoy pointChargeRepositoy;
 
   @Override
   public ResponseEntity<? super PostPointChargeResponseDto> postPointCharge(PostPointChargeRequestDto dto) {
     try {
 
+      // Dto에서 필요한 정보 가져오기
       String userId = dto.getUserId();
       int chargePoint = dto.getChargePoint();
-      int currentPoint = userRepository.findByUserId(userId).getPoint();
 
-      boolean existedUserId = userRepository.existsByUserId(userId);
-      if (!existedUserId)
-        return PostPointChargeResponseDto.noExistUser();
-      if (chargePoint < 0)
-        return PostPointChargeResponseDto.pointChargeFail();
-      if (currentPoint < 0)
-        return PostPointChargeResponseDto.pointChargeFail();
+      // 회원 조회
+      UserEntity userEntity = userRepository.findByUserId(userId);
+      // 등록된 회원이 아닌 경우 예외처리
+      if (userEntity == null) return PostPointChargeResponseDto.noExistUser();
 
-      PointChargeEntity pointChargeEntity = new PointChargeEntity(dto, currentPoint);
+      // 회원 현재_포인트 + 포인트 관련 예외처리
+      int currentPoint = userEntity.getPoint();
+      if (chargePoint < 0) return PostPointChargeResponseDto.pointChargeFail();
+      if (currentPoint < 0) return PostPointChargeResponseDto.pointChargeFail();
+
+      // 포인트 엔터티 생성
+      PointChargeEntity pointChargeEntity = new PointChargeEntity(dto, userEntity, currentPoint);
       pointChargeRepositoy.save(pointChargeEntity);
 
     } catch (Exception exception) {
@@ -99,75 +104,101 @@ public class PointServiceImplement implements PointService {
 
   @Override
   public ResponseEntity<? super ApprovalPointChargeResponseDto> approvePointCharge(ApprovalPointChargeRequestDto dto) {
-
     try {
-
       // 매니저ID, 포인트충전ID를 변수에 담는다.
       int managerId = dto.getManagerId();
       int pointChargeId = dto.getPointChargeId();
 
-      // 매니저ID, 포인트충전ID이 비어있는 경우 예외처리.
+      // 관리자가 아닌 경우 예외처리
       boolean existedManagerId = managerRepository.existsByManagerId(managerId);
-      boolean existsByPointChargeIdAndStatus = pointChargeRepositoy.existsByPointChargeIdAndStatus(pointChargeId, "미승인");
-      boolean existedPointChargeId = pointChargeRepositoy.existsByPointChargeId(pointChargeId);
-      if (!existedManagerId)
-        return ApprovalPointChargeResponseDto.noExistManager();
-      if (!existsByPointChargeIdAndStatus)
-        return ApprovalPointChargeResponseDto.alreadyPointCharge();
-      if (!existedPointChargeId)
-        return ApprovalPointChargeResponseDto.pointChargeFail();
+      if (!existedManagerId) return ApprovalPointChargeResponseDto.noExistManager();
 
-      // 포인트충전ID로 엔티티를 찾고 수정된 데이터를 바꿔준다.
+      // 충전_내역 조회
       PointChargeEntity pointChargeEntity = pointChargeRepositoy.findByPointChargeId(pointChargeId);
+      // 내역이 없는 경우 예외처리
+      if (pointChargeEntity == null) return ApprovalPointChargeResponseDto.pointChargeFail();
+      // 이미 충전이 진행된 경우 예외처리
+      if (pointChargeEntity.getStatus() == "승인") return ApprovalPointChargeResponseDto.alreadyPointCharge();
+      // 포인트충전ID로 엔티티를 찾고 수정된 데이터를 바꿔준다.
       pointChargeEntity.approvalPointCharge(dto);
+
+      // 요청한 회원
+      UserEntity userEntity = pointChargeEntity.getUser();
+      // 충전할 포인트
+      int chargePoint = pointChargeEntity.getChargePoint();
+      // 기존 포인트에 충전금액을 더 해준다.
+      userEntity.pointCharge(chargePoint);
+
+      // 데이터 저장
+      userRepository.save(userEntity);
       pointChargeRepositoy.save(pointChargeEntity);
-
-      // 포인트충전의 userId와 충전금액을 찾는다.
-      // String userId = pointChargeEntity.getUserId();
-      // int chargePoint = pointChargeEntity.getChargePoint();
-
-      // 찾은 userID로 유저데이터 조회
-      // UserEntity userEntity = userRepository.findByUserId(userId);
-
-      // // 기존 포인트에 충전금액을 더 해준다.
-      // userEntity.pointCharge(chargePoint);
-      // userRepository.save(userEntity);
 
     } catch (Exception exception) {
       exception.printStackTrace();
       return ResponseDto.databaseError();
     }
-
     return ApprovalPointChargeResponseDto.success();
-
   }
 
   @Override
-  public ResponseEntity<? super CancelPointChargeResponse> cancelPointCharge(CancelPointChargeRequestDto dto) {
-
+  public ResponseEntity<? super CancelPointChargeResponseDto> cancelPointCharge(CancelPointChargeRequestDto dto) {
     try {
-
       // dto에서 포인트충전ID를 추출
       int pointChargeId = dto.getPointChargeId();
 
-
-      // 포인트충전ID가 없는 경우, 이미 승인되어진 경우 예외처리
-      boolean existedPointChargeId = pointChargeRepositoy.existsByPointChargeId(pointChargeId);
-      boolean existsByPointChargeIdAndStatus = pointChargeRepositoy.existsByPointChargeIdAndStatus(pointChargeId, "승인");
-      if (!existedPointChargeId)
-        return CancelPointChargeResponse.CancelPointChargeFail();
-      if (!existsByPointChargeIdAndStatus)
-        return ApprovalPointChargeResponseDto.alreadyPointCharge();
-      // 포인트충전ID로 검색후 해당 엔터티 삭제
+      // 포인트 충전_내역 조회
       PointChargeEntity pointChargeEntity = pointChargeRepositoy.findByPointChargeId(pointChargeId);
+      // 포인트 충전_내역이 없는 경우 예외처리
+      if(pointChargeEntity == null) return CancelPointChargeResponseDto.CancelPointChargeFail();
+      if(pointChargeEntity.getStatus() != "승인") CancelPointChargeResponseDto.CancelPointChargeFail();
+
+      // 승인에서 미승인으로 전환
+      pointChargeEntity.setStatus("미승인");
+      // 완료 시간 초기화
+      pointChargeEntity.setApprovalDate(null);
+      // 관리자 번호 초기화
+      pointChargeEntity.setManagerId(0);
+
+
+      // 요청자 조회
+      UserEntity userEntity = pointChargeEntity.getUser();
+      // 충전 포인트
+      int chargePoint = pointChargeEntity.getChargePoint();
+      // 충전 포인트 회수
+      userEntity.pointPay(chargePoint);
+
+      pointChargeRepositoy.save(pointChargeEntity);
+      userRepository.save(userEntity);
+    } catch (Exception exception) {
+      exception.printStackTrace();
+      return ResponseDto.databaseError();
+    }
+
+    return CancelPointChargeResponseDto.success();
+  }
+
+  @Override
+  public ResponseEntity<? super DeletePointChargeResponseDto> deletePointCharge(DeletePointChargeRequestDto dto) {
+    try {
+
+      // Dto에서 충전내역 ID 가져옴
+      int pointChargeId = dto.getPointChargeId();
+
+      // 포인트 충전 내역을 조회
+      PointChargeEntity pointChargeEntity = pointChargeRepositoy.findByPointChargeId(pointChargeId);
+      // 이미 승인 완료되었다면 예외처리 + (미승인 상태에서만 삭제가 가능하다.)
+      if ("승인".equals(pointChargeEntity.getStatus())) {
+        return DeletePointChargeResponseDto.DeletePointChargeFail();
+    }
+      // 데이터 삭제
       pointChargeRepositoy.delete(pointChargeEntity);
 
     } catch (Exception exception) {
       exception.printStackTrace();
-      return ResponseDto.databaseError();
+      ResponseDto.databaseError();
     }
 
-    return CancelPointChargeResponse.success();
+    return DeletePointChargeResponseDto.success();
   }
 
 }

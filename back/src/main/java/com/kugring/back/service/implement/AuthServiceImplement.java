@@ -179,14 +179,15 @@ public class AuthServiceImplement implements AuthService {
   @Override
   public ResponseEntity<? super PinCheckResponseDto> pinCheck(PinCheckRequestDto dto) {
 
+    // 회원 정보를 담을 객체 선언
     UserEntity userEntity;
-
     try {
+      // Dto에서 핀번호 가져옴
       String pin = dto.getPin();
-
+      // pin으로 데이터 조회
       userEntity = userRepository.findByPin(pin);
-      if (userEntity == null)
-        return PinCheckResponseDto.pinFail();
+      // 정보가 없다면 예외처리
+      if (userEntity == null) return PinCheckResponseDto.pinFail();
 
     } catch (Exception exception) {
       exception.printStackTrace();

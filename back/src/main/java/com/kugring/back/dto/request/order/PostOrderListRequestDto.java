@@ -2,7 +2,7 @@ package com.kugring.back.dto.request.order;
 
 import java.util.List;
 
-import com.kugring.back.dto.object.OrderItem;
+import com.kugring.back.dto.object.OrderItemObject;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -22,6 +22,6 @@ public class PostOrderListRequestDto {
   private String payMethod;
 
   @NotNull
-  private List<OrderItem> orderItems;
+  private List<OrderItemObject> orderItems;
 
 }
