@@ -32,7 +32,7 @@ public class OrderItemOptionEntity {
   private OrderItemEntity orderItem;
 
   @ManyToOne
-  @JoinColumn(name = "option_code")
+  @JoinColumn(name = "option_id")
   private OptionEntity option;
 
   @NotNull

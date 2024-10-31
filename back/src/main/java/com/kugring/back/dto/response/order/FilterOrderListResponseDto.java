@@ -7,7 +7,7 @@ import org.springframework.http.ResponseEntity;
 
 import com.kugring.back.common.ResponseCode;
 import com.kugring.back.common.ResponseMessage;
-import com.kugring.back.dto.object.OrderListItemObject;
+import com.kugring.back.dto.object.OrderListObject;
 import com.kugring.back.dto.response.ResponseDto;
 import com.kugring.back.entity.OrderListEntity;
 
@@ -16,11 +16,11 @@ import lombok.Getter;
 @Getter
 public class FilterOrderListResponseDto extends ResponseDto {
 
-  private List<OrderListItemObject> orderItems;
+  private List<OrderListObject> orderLists;
 
   private FilterOrderListResponseDto(List<OrderListEntity> orderListEntities) {
     super();
-    this.orderItems = OrderListItemObject.getList(orderListEntities);
+    this.orderLists = OrderListObject.getList(orderListEntities);
   }
 
   // 성공 응답

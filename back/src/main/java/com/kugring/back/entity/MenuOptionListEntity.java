@@ -29,7 +29,8 @@ public class MenuOptionListEntity {
     private MenuEntity menu;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "option_code")
+    @JoinColumn(name = "option_id")
     private OptionEntity option;
     
+
 }

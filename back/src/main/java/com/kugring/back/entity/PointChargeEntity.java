@@ -30,7 +30,7 @@ public class PointChargeEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private int pointChargeId;
+  private int pointChargeId; 
   private int managerId;
 
   @NotNull
@@ -69,7 +69,8 @@ public class PointChargeEntity {
   }
 
   // 매니저가 직접 충전하는 경우
-  public PointChargeEntity(PointDirectChargeRequestDto dto, int currentPoint) {
+  public PointChargeEntity(PointDirectChargeRequestDto dto, UserEntity userEntity, int currentPoint) {
+    this.user = userEntity;
     this.status = "승인";
     this.createDate = LocalDateTime.now();
     this.approvalDate = LocalDateTime.now();

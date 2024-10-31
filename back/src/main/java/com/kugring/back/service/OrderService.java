@@ -17,9 +17,9 @@ public interface OrderService {
 
   ResponseEntity<? super PostOrderListResponseDto> postOrderList(PostOrderListRequestDto dto);
 
-  // ResponseEntity<? super PatchOrderListResponseDto> patchOrderList(Integer orderListId, PatchOrderListRequestDto dto);
+  ResponseEntity<? super PatchOrderListResponseDto> patchOrderList(Integer orderListId, PatchOrderListRequestDto dto);
 
-  // ResponseEntity<? super PutOrderListResponseDto> putOrderList(Integer orderListId, PutOrderListRequestDto dto);
+  ResponseEntity<? super PutOrderListResponseDto> putOrderList(Integer orderListId, PutOrderListRequestDto dto);
 
 
 

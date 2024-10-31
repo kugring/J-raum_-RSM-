@@ -11,30 +11,29 @@ import com.kugring.back.entity.OrderListEntity;
 @Repository
 public interface OrderListRepository extends JpaRepository<OrderListEntity, Integer> {
 
-  // userId, orderStatus, createDate, completeDate 동적 필터링
-  @Query(value = "SELECT o.* FROM order_list o " 
-      + "LEFT JOIN order_item oi ON o.order_list_id = oi.order_list_id "
-      + "LEFT JOIN order_item_option oio ON oi.order_item_id = oio.order_item_id " 
-      + "LEFT JOIN menu m ON oi.menu_id = m.menu_id "
-      + "WHERE (:userId IS NULL OR o.user_id = :userId) " 
-      + "AND (:orderStatus IS NULL OR o.order_status = :orderStatus) "
-      + "AND (:startCreateDate IS NULL OR o.create_order_date >= :startCreateDate) "
-      + "AND (:endCreateDate IS NULL OR o.create_order_date <= :endCreateDate) "
-      + "AND (:startCompleteDate IS NULL OR o.complete_order_date >= :startCompleteDate) "
-      + "AND (:endCompleteDate IS NULL OR o.complete_order_date <= :endCompleteDate)", nativeQuery = true)
-  List<OrderListEntity> findOrders(@Param("userId") String userId, @Param("orderStatus") String orderStatus,
-      @Param("startCreateDate") LocalDateTime startCreateDate, @Param("endCreateDate") LocalDateTime endCreateDate,
-      @Param("startCompleteDate") LocalDateTime startCompleteDate, @Param("endCompleteDate") LocalDateTime endCompleteDate);
+    // userId, orderStatus, createDate, completeDate 동적 필터링
+  @Query("SELECT o FROM OrderListEntity o " +
+        // "LEFT JOIN FETCH o.orderItems oi " + 이런거 조인 안해도 알아서 가져옴
+        // "LEFT JOIN FETCH oi.orderItemOptions oio " +
+        // "LEFT JOIN FETCH oi.menu m " +
+        "WHERE (:userId IS NULL OR o.user.userId = :userId) " +
+        "AND (:orderStatus IS NULL OR o.orderStatus = :orderStatus) " +
+        "AND (:startCreateDate IS NULL OR o.createOrderDate >= :startCreateDate) " +
+        "AND (:endCreateDate IS NULL OR o.createOrderDate <= :endCreateDate) " +
+        "AND (:startCompleteDate IS NULL OR o.completeOrderDate >= :startCompleteDate) " +
+        "AND (:endCompleteDate IS NULL OR o.completeOrderDate <= :endCompleteDate)")
+  List<OrderListEntity> findOrders(@Param("userId") String userId, 
+                                    @Param("orderStatus") String orderStatus,
+                                    @Param("startCreateDate") LocalDateTime startCreateDate, 
+                                    @Param("endCreateDate") LocalDateTime endCreateDate,
+                                    @Param("startCompleteDate") LocalDateTime startCompleteDate, 
+                                    @Param("endCompleteDate") LocalDateTime endCompleteDate);
+
 
 
 
   @Query("SELECT ol FROM OrderListEntity ol " + "JOIN FETCH ol.orderItems oi " + "JOIN FETCH oi.menu " + "WHERE ol.orderListId = :orderListId")
   OrderListEntity findByOrderListId(@Param("orderListId") Integer orderListId);
-
-
-
-  boolean existsByOrderListId(Integer orderListId);
-
 
 
 }

@@ -10,6 +10,6 @@ import lombok.NoArgsConstructor;
 public class MenuOptionListObject {
     
   private int menuId;
-  private String optionCode;
+  private int optionId;
 
 }

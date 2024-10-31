@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class OrderListItemObject {
+public class OrderListObject {
 
   private int orderListId;
   private String userId;
@@ -24,20 +24,20 @@ public class OrderListItemObject {
   private List<OrderItemObject> orderItems;
 
 
-  public OrderListItemObject(OrderListEntity orderListEntity) {
-    this.orderListId = orderListEntity.getOrderListId();
+  public OrderListObject(OrderListEntity orderListEntity) {
     this.userId = orderListEntity.getUser().getUserId();
-    this.orderStatus = orderListEntity.getOrderStatus();
     this.payMethod = orderListEntity.getPayMethod();
+    this.orderListId = orderListEntity.getOrderListId();
+    this.orderStatus = orderListEntity.getOrderStatus();
     this.createOrderDate = orderListEntity.getCreateOrderDate();
     this.completeOrderDate = orderListEntity.getCompleteOrderDate();
     this.orderItems = OrderItemObject.getList(orderListEntity.getOrderItems());
   }
 
-  public static List<OrderListItemObject> getList(List<OrderListEntity> orderListEntities) {
-    List<OrderListItemObject> list = new ArrayList<>();
+  public static List<OrderListObject> getList(List<OrderListEntity> orderListEntities) {
+    List<OrderListObject> list = new ArrayList<>();
     for (OrderListEntity orderListEntity : orderListEntities) {
-      OrderListItemObject item = new OrderListItemObject(orderListEntity);
+      OrderListObject item = new OrderListObject(orderListEntity);
       list.add(item);
     }
     return list;

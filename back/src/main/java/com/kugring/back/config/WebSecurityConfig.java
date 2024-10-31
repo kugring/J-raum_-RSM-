@@ -57,7 +57,7 @@ public class WebSecurityConfig {
                                                                                                                          // (세션을 이번 프로젝트에서 사용하지 않는다.)
         )
         .authorizeHttpRequests(request -> request
-            .requestMatchers("/", "/api/v1/auth/**", "/oauth2/**", "/api/v1/board/**", "/api/v1/point/**", "/api/v1/menu/**", "/api/v1/user/**", "/api/v1/order/**")
+            .requestMatchers("/", "/api/v1/auth/**", "/oauth2/**", "/api/v1/board/**", "/api/v1/point/**", "/api/v1/menu/**", "/api/v1/user/**", "/api/v1/order/**", "/api/v1/option/**")
             .permitAll().requestMatchers("/api/v1/user/**").hasRole("USER").requestMatchers("/api/v1/admin/**").hasRole("ADMIN").anyRequest().authenticated() // 위에
                                                                                                                                                               // 경로를
                                                                                                                                                               // 제외한

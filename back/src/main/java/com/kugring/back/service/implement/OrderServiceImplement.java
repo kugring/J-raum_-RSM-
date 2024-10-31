@@ -27,8 +27,6 @@ import com.kugring.back.entity.OrderListEntity;
 import com.kugring.back.entity.UserEntity;
 import com.kugring.back.repository.MenuRepository;
 import com.kugring.back.repository.OptionRepository;
-import com.kugring.back.repository.OrderItemOptionRepository;
-import com.kugring.back.repository.OrderItemRepository;
 import com.kugring.back.repository.OrderListRepository;
 import com.kugring.back.repository.UserRepository;
 import com.kugring.back.service.OrderService;
@@ -42,8 +40,6 @@ public class OrderServiceImplement implements OrderService {
 
 
     private final OrderListRepository orderListRepository;
-    private final OrderItemRepository orderItemRepository;
-    private final OrderItemOptionRepository orderItemOptionRepository;
     private final UserRepository userRepository;
     private final MenuRepository menuRepository;
     private final OptionRepository optionRepository;
@@ -61,9 +57,9 @@ public class OrderServiceImplement implements OrderService {
             // 해당 메뉴 ID들이 모두 존재하는지 확인
             if (menuRepository.countByMenuIdIn(menuIds) != menuIds.size()) return PostOrderListResponseDto.noExistMenu();
             // 옵션 코드들 추출
-            List<String> optionCodes = dto.getOrderItems().stream().flatMap(orderItem -> orderItem.getOrderItemOptions().stream()).map(OrderItemOptionObject::getOptionCode).collect(Collectors.toList());
+            List<Integer> optionIds = dto.getOrderItems().stream().flatMap(orderItem -> orderItem.getOrderItemOptions().stream()).map(OrderItemOptionObject::getOptionId).collect(Collectors.toList());
             // 해당 옵션 코드들이 모두 존재하는지 확인
-            if (optionRepository.countByOptionCodeIn(optionCodes) != optionCodes.size()) return PostOrderListResponseDto.noExistOption();
+            if (optionRepository.countByOptionIdIn(optionIds) != optionIds.size()) return PostOrderListResponseDto.noExistOption();
             
             // OrderListEntity 생성
             OrderListEntity orderList = new OrderListEntity();
@@ -87,7 +83,7 @@ public class OrderServiceImplement implements OrderService {
                     // OrderItem 과 OrderItemOption 연결
                     orderItemOption.setOrderItem(orderItem);
                     // 옵션 Entity 가져오기
-                    OptionEntity optionEntity = optionRepository.findByOptionCode(optionDto.getOptionCode());
+                    OptionEntity optionEntity = optionRepository.findByOptionId(optionDto.getOptionId());
                     // 옵션 코드 Set
                     orderItemOption.setOption(optionEntity);
                     // 옵션 수량 Set
@@ -160,21 +156,7 @@ public class OrderServiceImplement implements OrderService {
             LocalDateTime startCompleteDate = dto.getStartCompleteDate();
             LocalDateTime endCompleteDate = dto.getEndCompleteDate();
 
-            System.out.println("이것은 회원Id : " + userId);
-            System.out.println("이것은 상태 : " + orderStatus);
-            System.out.println("이것은 생성시작 : " + startCreateDate);
-            System.out.println("이것은 생성종료 : " + endCreateDate);
-            System.out.println("이것은 완료시작 : " + startCompleteDate);
-            System.out.println("이것은 완료종료 : " + endCompleteDate);
-
-            boolean weasdf = startCreateDate == null ? true : false;
-            boolean asdfwef = endCompleteDate == null ? true : false;
-
-            System.out.println("생성시작값:" + weasdf);
-            System.out.println("완료종료값:" + asdfwef);
-
             orderListEntities = orderListRepository.findOrders(userId, orderStatus, startCreateDate, endCreateDate, startCompleteDate, endCompleteDate);
-
         } catch (Exception exception) {
             exception.printStackTrace();
             ResponseDto.databaseError();
@@ -183,135 +165,201 @@ public class OrderServiceImplement implements OrderService {
         return FilterOrderListResponseDto.success(orderListEntities);
     }
 
-    // @Override
-    // @Transactional
-    // public ResponseEntity<? super PatchOrderListResponseDto> patchOrderList(Integer orderListId, PatchOrderListRequestDto dto) {
+    @Override
+    @Transactional
+    public ResponseEntity<? super PatchOrderListResponseDto> patchOrderList(Integer orderListId, PatchOrderListRequestDto dto) {
 
-    //     try {
+        try {
 
-    //         // 해당 주문리스트가 없으면 반환
-    //         if (!orderListRepository.existsByOrderListId(orderListId)) {
-    //             return PatchOrderListResponseDto.noExistOrder();
-    //         }
+            // 주문리스트를 찾아옴
+            OrderListEntity orderListEntity = orderListRepository.findByOrderListId(orderListId);
 
-    //         // 주문리스트를 찾아옴
-    //         OrderListEntity orderListEntity = orderListRepository.findByOrderListId(orderListId);
-    //         String orderStatus = dto.getOrderStatus();
-    //         String preOrderStatus = orderListEntity.getOrderStatus();
+            // 해당 주문리스트가 없으면 예외처리
+            if(orderListEntity == null) return PatchOrderListResponseDto.noExistOrder();
 
-    //         // 포인트 업데이트 로직 처리
-    //         UserEntity user = userRepository.findByUserId(orderListEntity.getUser().getUserId());
-    //         int totalPrice = calculateTotalPrice(orderListEntity);
+            // Dto에서 주문 상태 가져옴
+            String orderStatus = dto.getOrderStatus();
 
-    //         Set<String> validStatuses = Set.of("대기", "완료", "취소");
+            // 이전 주문 상태 가져옴
+            String preOrderStatus = orderListEntity.getOrderStatus();
 
-    //         if (!validStatuses.contains(orderStatus)) {
-    //             return PatchOrderListResponseDto.noExistOrderStatus();
-    //         }
-    //         if (!preOrderStatus.equals("취소") && orderStatus.equals("취소")) {
-    //             // 환불 처리
-    //             updateUserPoints(user, totalPrice, true);
-    //         } else if (preOrderStatus.equals("취소") && (orderStatus.equals("대기") || orderStatus.equals("완료"))) {
-    //             // 결제 처리
-    //             if ((user.getPoint() - totalPrice) < 0) {
-    //                 return PatchOrderListResponseDto.insufficientBlance();
-    //             }
-    //             updateUserPoints(user, totalPrice, false);
-    //         }
+            // 주문 상태 오류라면 예외처리
+            Set<String> validStatuses = Set.of("대기", "완료", "취소");
+            if (!validStatuses.contains(orderStatus))  return PatchOrderListResponseDto.noExistOrderStatus();
 
-    //         // 주문 상태를 변경해줌
-    //         orderListEntity.setOrderStatus(orderStatus);
-    //         orderListRepository.save(orderListEntity);
+            // 주문자 정보 가져옴
+            UserEntity userEntity = orderListEntity.getUser();
 
-    //     } catch (Exception exception) {
-    //         exception.printStackTrace();
-    //         return ResponseDto.databaseError();
-    //     }
+            // 완료 상태에서 대기로 변경 시 완료시간 초기화
+            if (preOrderStatus.equals("완료") && orderStatus.equals("대기")) {
+                orderListEntity.setCompleteOrderDate(null);
+            }
+            // 대기 상태에서 완료로 변경 시 완료시간 작성
+            else if (preOrderStatus.equals("대기") && orderStatus.equals("완료")) {
+                orderListEntity.setCompleteOrderDate(LocalDateTime.now());
+            }
+            // 포인트 계산 및 처리
+            else if ((preOrderStatus.equals("대기") && orderStatus.equals("취소")) ||
+                (preOrderStatus.equals("취소") && (orderStatus.equals("대기") || orderStatus.equals("완료")))) {
+                orderListEntity.setCompleteOrderDate(LocalDateTime.now());
+                int totalPrice = orderListEntity.getOrderItems().stream()
+                    .mapToInt(orderItem -> {
+                        int menuPrice = orderItem.getMenu().getMenuPrice();
+                        int optionTotalPrice = orderItem.getOrderItemOptions().stream()
+                            .mapToInt(optionItem -> optionItem.getOptionQuantity() * optionItem.getOption().getOptionPrice())
+                            .sum();
+                        return (menuPrice + optionTotalPrice) * orderItem.getOrderItemQuantity();
+                    }).sum();
+                
+                if (orderStatus.equals("취소")) {
+                    userEntity.pointCharge(totalPrice);  // 포인트 롤백
+                } else {
+                    userEntity.pointPay(totalPrice);     // 포인트 결제
+                }
+            } else {
+                // 상태가 이상하면 예외처리
+                return PatchOrderListResponseDto.noExistOrderStatus();
+            }
 
-    //     return PatchOrderListResponseDto.success();
-    // }
+            // 주문 상태를 변경해줌
+            orderListEntity.setOrderStatus(orderStatus);
+            orderListRepository.save(orderListEntity);
 
-    // @Override
-    // public ResponseEntity<? super PutOrderListResponseDto> putOrderList(Integer orderListId, PutOrderListRequestDto dto) {
+        } catch (Exception exception) {
+            exception.printStackTrace();
+            return ResponseDto.databaseError();
+        }
 
+        return PatchOrderListResponseDto.success();
+    }
 
-    //     try {
-
-    //         // 예외처리_(주문리스트ID)
-    //         if (!orderListRepository.existsByOrderListId(orderListId)) {
-    //             return PutOrderListResponseDto.orderFail();
-    //         }
-    //         // 예외처리_(메뉴ID)
-    //         List<Integer> menuIds = dto.getOrderItems().stream().map(OrderItem::getMenuId).collect(Collectors.toList());
-    //         if (menuRepository.countByMenuIdIn(menuIds) != menuIds.size()) {
-    //             return PutOrderListResponseDto.noExistMenu();
-    //         }
-    //         // 예외처리_(옵션코드)
-    //         List<String> optionCodes = dto.getOrderItems().stream().flatMap(orderItem -> orderItem.getOrderItemOptions().stream())
-    //                 .map(OrderItemOption::getOptionCode).collect(Collectors.toList());
-    //         if (optionRepository.countByOptionCodeIn(optionCodes) != optionCodes.size()) {
-    //             return PutOrderListResponseDto.noExistOption();
-    //         }
-
-    //         // OrderListEntity 조회
-    //         OrderListEntity orderList = orderListRepository.findByOrderListId(orderListId);
+    @Override
+    public ResponseEntity<? super PutOrderListResponseDto> putOrderList(Integer orderListId, PutOrderListRequestDto dto) {
 
 
+        try {
 
-    //         // todo: 원래는 기존데이터를 수정하고 새로운 값이 있는 경우 추가하는 식으로 하려 했는데 그냥 기존 데이터 다 날리고 새로운 데이터를 넣는 쪽으로 생각하는걸루!
+            // OrderListEntity 조회
+            OrderListEntity orderList = orderListRepository.findByOrderListId(orderListId);
 
-    //         // OrderListEntity 조회
+            // 예외처리_(주문리스트ID)
+            if(orderList == null) return PutOrderListResponseDto.orderFail();
 
-    //         // 기존 OrderItemEntity 리스트 가져오기
-    //         List<OrderItemEntity> preOrderItems = orderList.getOrderItems();
+            // 예외처리_(포인트결제가 아닌 경우)
+            if(!orderList.getPayMethod().equals("포인트결제")) return PutOrderListResponseDto.orderFail();
 
-    //         // 기존의 OrderItemEntity 및 OrderItemOptionEntity 삭제
-    //         for (OrderItemEntity item : preOrderItems) {
-    //             // 각 OrderItemEntity에 종속된 OrderItemOptionEntity 삭제
-    //             List<OrderItemOptionEntity> options = item.getOrderItemOptions();
-    //             options.forEach(option -> orderItemOptionRepository.delete(option)); // 옵션 삭제
+            // 예외처리_(대기상태가 아닌 경우)
+            if(!orderList.getOrderStatus().equals("대기")) return PutOrderListResponseDto.orderFail();
 
-    //             // OrderItemEntity 삭제
-    //             orderItemRepository.delete(item);
-    //         }
+            // 예외처리_(메뉴ID)
+            List<Integer> menuIds = dto.getOrderItems().stream().map(OrderItemObject::getMenuId).collect(Collectors.toList());
+            if (menuRepository.countByMenuIdIn(menuIds) != menuIds.size()) return PutOrderListResponseDto.noExistMenu();
 
-
-
-    //         // 새로운 OrderItemEntity 리스트를 OrderListEntity에 설정
-
-    //         // 저장
-    //         orderListRepository.save(orderList);
+            // 예외처리_(옵션코드) // todo: 여기에 문제 있음
+            List<Integer> optionIds = dto.getOrderItems().stream().flatMap(orderItem -> orderItem.getOrderItemOptions().stream())
+                    .map(OrderItemOptionObject::getOptionId).collect(Collectors.toList());
+            if (optionRepository.countByOptionIdIn(optionIds) != optionIds.size()) return PutOrderListResponseDto.noExistOption();
 
 
-    //     } catch (Exception exception) {
-    //         exception.printStackTrace();
-    //         ResponseDto.databaseError();
-    //     }
-    //     return PutOrderListResponseDto.success();
-    // }
+            // 주문자 가져오기
+            UserEntity userEntity = orderList.getUser();
 
-    // // 주문 항목의 가격 계산 메소드
-    // private int calculateTotalPrice(OrderListEntity orderListEntity) {
-    //     int totalPrice = 0;
+            // 기존 OrderItemEntity 리스트 가져오기
+            List<OrderItemEntity> preOrderItems = orderList.getOrderItems();
 
-    //     for (OrderItemEntity orderItemEntity : orderListEntity.getOrderItems()) {
-    //         // 메뉴 가격 조회
-    //         int menuPrice = menuRepository.findPriceByMenuId(orderItemEntity.getMenu().getMenuId()).orElseThrow(() -> new RuntimeException("Menu not found"));
-    //         totalPrice += menuPrice * orderItemEntity.getOrderItemQuantity();
+            // 취소된 가격
+            int rollBackPrice = preOrderItems.stream()
+            .mapToInt(orderItem -> {
+                int menuPrice = orderItem.getMenu().getMenuPrice();
+                int itemQuantity = orderItem.getOrderItemQuantity();
+                
+                // 기본 메뉴 가격에 옵션 가격의 총합을 추가합니다.
+                int optionTotalPrice = orderItem.getOrderItemOptions().stream()
+                    .mapToInt(optionItem -> optionItem.getOptionQuantity() * optionItem.getOption().getOptionPrice())
+                    .sum();
+                
+                return (menuPrice + optionTotalPrice) * itemQuantity;
+            }).sum();
 
-    //         // 옵션 가격 계산
-    //     }
-    //     return totalPrice;
-    // }
+            // 포인트 롤백
+            userEntity.pointCharge(rollBackPrice);
 
-    // // 포인트 업데이트 메소드
-    // private void updateUserPoints(UserEntity user, int totalPrice, boolean isRefund) {
-    //     if (isRefund) {
-    //         user.setPoint(user.getPoint() + totalPrice); // 환불 시 포인트 추가
-    //     } else {
-    //         user.setPoint(user.getPoint() - totalPrice); // 결제 시 포인트 차감
-    //     }
-    //     userRepository.save(user);
-    // }
+            // orderItems 리스트를 비우면 종속된 order_item 데이터도 삭제됩니다.
+            orderList.getOrderItems().clear();
+
+            // todo: 클린하고 저장을 해야 삭제되나?  결론: 안해도됨
+            // orderListRepository.save(orderList);
+
+            // OrderItemEntity 리스트 생성 및 추가
+            List<OrderItemEntity> orderItems = dto.getOrderItems().stream().map(itemDto -> {
+                // 등록할 아이템 생성
+                OrderItemEntity orderItem = new OrderItemEntity();
+                // OrderList와 OrderItem 연결
+                orderItem.setOrderList(orderList); 
+                // 아이템 메뉴 Entity 가져오기  // todo : menuId만 넣어도 혹시 알아서 저장해주나? // 결론: 알아서 넣어줌 // But: 메뉴 가겨을 알아내기 위해서 엔티티로 저장!
+                MenuEntity menuEntity = menuRepository.findByMenuId(itemDto.getMenuId());
+                // MenuEntity menuEntity = new MenuEntity();
+                // menuEntity.setMenuId(itemDto.getMenuId());
+                // 아이템 메뉴 Set
+                orderItem.setMenu(menuEntity);
+                // 아이템 수량
+                orderItem.setOrderItemQuantity(itemDto.getOrderItemQuantity());
+                // OrderItemOptionEntity 리스트 생성 및 추가
+                List<OrderItemOptionEntity> orderItemOptions = itemDto.getOrderItemOptions().stream().map(optionDto -> {
+                    // 등록할 아이템의 옵션 생성
+                    OrderItemOptionEntity orderItemOption =  new OrderItemOptionEntity();
+                    // OrderItem 과 OrderItemOption 연결
+                    orderItemOption.setOrderItem(orderItem);
+                    // 옵션 Entity 가져오기
+                    OptionEntity optionEntity = optionRepository.findByOptionId(optionDto.getOptionId());
+                    // 옵션 코드 Set
+                    orderItemOption.setOption(optionEntity);
+                    // 옵션 수량 Set
+                    orderItemOption.setOptionQuantity(optionDto.getOptionQuantity());
+                    // 가공된 옵션 데이터 반환
+                    return orderItemOption;
+                }).collect(Collectors.toList());
+                // 가공된 옵션 리스트를 아이템의 필드에 Set
+                orderItem.setOrderItemOptions(orderItemOptions);
+                return orderItem;
+            }).collect(Collectors.toList());
+
+
+            int totalPrice = orderItems.stream()
+                .mapToInt(orderItem -> {
+                    int menuPrice = orderItem.getMenu().getMenuPrice();
+                    int itemQuantity = orderItem.getOrderItemQuantity();
+
+                    // 기본 메뉴 가격에 옵션 가격의 총합을 추가합니다.
+                    int optionTotalPrice = orderItem.getOrderItemOptions().stream()
+                        .mapToInt(optionItem -> optionItem.getOptionQuantity() * optionItem.getOption().getOptionPrice())
+                        .sum();
+                    
+                    return (menuPrice + optionTotalPrice) * itemQuantity;
+                }).sum();
+
+            // 잔액 확인
+            int updatedPoint = userEntity.getPoint() - totalPrice;
+
+            // 포인트가 음수가 되지 않도록 설정
+            if (updatedPoint < 0) return PostOrderListResponseDto.insufficientBlance();
+            // 잔여금 저장
+            userEntity.setPoint(updatedPoint);
+
+            // 수정된_주문_아이템 담기
+            orderList.getOrderItems().addAll(orderItems);
+            // 수정된_주문자 등록
+            orderList.setUser(userEntity);
+
+            // 저장
+            userRepository.save(userEntity);
+            orderListRepository.save(orderList);
+
+        } catch (Exception exception) {
+            exception.printStackTrace();
+            ResponseDto.databaseError();
+        }
+        return PutOrderListResponseDto.success();
+    }
 
 }

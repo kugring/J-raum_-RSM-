@@ -36,24 +36,23 @@ public class OrderController {
     return resposne;
   }
 
-
   @PostMapping("")
   public ResponseEntity<? super PostOrderListResponseDto> postOrder(@RequestBody @Valid PostOrderListRequestDto reqeustBody) {
     ResponseEntity<? super PostOrderListResponseDto> resposne = orderService.postOrderList(reqeustBody);
     return resposne;
   }
 
-  // @PatchMapping("/{orderListId}")
-  // public ResponseEntity<? super PatchOrderListResponseDto> patchOrder(@RequestBody @Valid PatchOrderListRequestDto requestBody,
-  //     @PathVariable("orderListId") Integer orderListId) {
-  //   ResponseEntity<? super PatchOrderListResponseDto> resposne = orderService.patchOrderList(orderListId, requestBody);
-  //   return resposne;
-  // }
+  @PatchMapping("/{orderListId}")
+  public ResponseEntity<? super PatchOrderListResponseDto> patchOrder(@RequestBody @Valid PatchOrderListRequestDto requestBody,
+      @PathVariable("orderListId") Integer orderListId) {
+    ResponseEntity<? super PatchOrderListResponseDto> resposne = orderService.patchOrderList(orderListId, requestBody);
+    return resposne;
+  }
 
-  // @PutMapping("/{orderListId}")
-  // public ResponseEntity<? super PutOrderListResponseDto> putOrderList(@RequestBody @Valid PutOrderListRequestDto requestBody,
-  //     @PathVariable("orderListId") Integer orderListId) {
-  //   ResponseEntity<? super PutOrderListResponseDto> resposne = orderService.putOrderList(orderListId, requestBody);
-  //   return resposne;
-  // }
+  @PutMapping("/{orderListId}")
+  public ResponseEntity<? super PutOrderListResponseDto> putOrderList(@RequestBody @Valid PutOrderListRequestDto requestBody,
+      @PathVariable("orderListId") Integer orderListId) {
+    ResponseEntity<? super PutOrderListResponseDto> resposne = orderService.putOrderList(orderListId, requestBody);
+    return resposne;
+  }
 }

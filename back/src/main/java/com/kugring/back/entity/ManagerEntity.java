@@ -7,6 +7,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import com.kugring.back.dto.request.manager.AddNewManagerRequestDto;
+
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
@@ -20,5 +22,12 @@ public class ManagerEntity {
   private String position;
   private String password;
   private String pin;
+
+  public ManagerEntity(AddNewManagerRequestDto dto) {
+    this.managerName = dto.getNewManagerName();
+    this.position = dto.getNewManagerDuty();
+    this.password = dto.getNewManagerPassword();
+    this.pin = dto.getNewManagerPin();
+  }
 
 }

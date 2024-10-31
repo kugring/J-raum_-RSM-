@@ -17,7 +17,7 @@ public class OrderItemOptionObject {
 
 
   @NotBlank
-  private String optionCode;
+  private int optionId;
   @NotBlank
   private String optionDetail;
   @NotBlank
@@ -28,11 +28,11 @@ public class OrderItemOptionObject {
   private int orderItemOptionId;
 
   public OrderItemOptionObject(OrderItemOptionEntity orderItemOptionEntity) {
-    this.orderItemOptionId = orderItemOptionEntity.getOrderItemOptionId();
-    this.optionQuantity = orderItemOptionEntity.getOptionQuantity();
-    this.optionCode = orderItemOptionEntity.getOption().getOptionCode();
+    this.optionId = orderItemOptionEntity.getOption().getOptionId();
     this.optionPrice = orderItemOptionEntity.getOption().getOptionPrice();
     this.optionDetail = orderItemOptionEntity.getOption().getOptionDetail();
+    this.optionQuantity = orderItemOptionEntity.getOptionQuantity();
+    this.orderItemOptionId = orderItemOptionEntity.getOrderItemOptionId();
   }
 
 

@@ -69,26 +69,22 @@ public class PointServiceImplement implements PointService {
       String userId = dto.getUserId();
       int managerId = dto.getManagerId();
       int chargePoint = dto.getChargePoint();
-      boolean existedUserId = userRepository.existsByUserId(userId);
-      int currentPoint = userRepository.findByUserId(userId).getPoint();
-
-      // 예외처리
-      if (!existedUserId)
-        return PostPointChargeResponseDto.noExistUser();
-      if (chargePoint < 0)
-        return PostPointChargeResponseDto.pointChargeFail();
-      if (currentPoint < 0)
-        return PostPointChargeResponseDto.pointChargeFail();
-      boolean existedManagerId = managerRepository.existsByManagerId(managerId);
-      if (!existedManagerId)
-        return ApprovalPointChargeResponseDto.noExistManager();
-
-      // 엔티티 생성 후 저장
-      PointChargeEntity pointChargeEntity = new PointChargeEntity(dto, currentPoint);
-      pointChargeRepositoy.save(pointChargeEntity);
 
       // 찾은 userID로 유저데이터 조회
       UserEntity userEntity = userRepository.findByUserId(userId);
+
+      // 회원이 아닌 경우 예외처리
+      if(userEntity == null) return PostPointChargeResponseDto.noExistUser();
+
+      // 회원의 현재 포인트를 가져옴
+      int currentPoint = userEntity.getPoint();
+      if (chargePoint < 0) return PostPointChargeResponseDto.pointChargeFail();
+      if (currentPoint < 0) return PostPointChargeResponseDto.pointChargeFail();
+      if (!managerRepository.existsByManagerId(managerId)) return ApprovalPointChargeResponseDto.noExistManager();
+
+      // 엔티티 생성 후 저장
+      PointChargeEntity pointChargeEntity = new PointChargeEntity(dto, userEntity, currentPoint);
+      pointChargeRepositoy.save(pointChargeEntity);
 
       // 기존 포인트에 충전금액을 더 해준다.
       userEntity.pointCharge(chargePoint);
